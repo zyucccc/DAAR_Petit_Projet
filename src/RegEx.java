@@ -130,6 +130,8 @@ public class RegEx {
         }
         return result;
     }
+
+//    concatenation : abc
     private static boolean containConcat(ArrayList<RegExTree> trees) {
         boolean firstFound = false;
         for (RegExTree t: trees) {
@@ -166,6 +168,7 @@ public class RegEx {
         }
         return result;
     }
+
     private static boolean containAltern(ArrayList<RegExTree> trees) {
         for (RegExTree t: trees) if (t.root==ALTERN && t.subTrees.isEmpty()) return true;
         return false;
@@ -195,6 +198,7 @@ public class RegEx {
         }
         return result;
     }
+
     private static RegExTree removeProtection(RegExTree tree) throws Exception {
         if (tree.root==PROTECTION && tree.subTrees.size()!=1) throw new Exception();
         if (tree.subTrees.isEmpty()) return tree;
