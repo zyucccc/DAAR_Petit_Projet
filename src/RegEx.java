@@ -42,6 +42,9 @@ public class RegEx {
             try {
                 RegExTree ret = parse();
                 System.out.println("  >> Tree result: "+ret.toString()+".");
+                System.out.println("  Automate start: ");
+                Automate automate = new Automate(ret);
+                System.out.println("  Automate result: \n"+automate.toString());
             } catch (Exception e) {
                 System.err.println("  >> ERROR: syntax error for regEx \""+regEx+"\".");
             }
