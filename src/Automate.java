@@ -4,12 +4,12 @@ import java.util.HashMap;
 public class Automate {
 
     private int istate;
-    private int fstate;
+    private int astate;
     HashMap<Integer, ArrayList<Transition2>> transitions;
 
     public Automate(int istate, int fstate) {
         this.istate = istate;
-        this.fstate = fstate;
+        this.astate = fstate;
         this.transitions = new HashMap<>();
     }
 
@@ -17,9 +17,9 @@ public class Automate {
 
     public void setIstate(int istate) { this.istate = istate; }
 
-    public int getFstate() { return fstate; }
+    public int getFstate() { return astate; }
 
-    public void setFstate(int fstate) { this.fstate = fstate; }
+    public void setFstate(int fstate) { this.astate = fstate; }
 
     public HashMap<Integer, ArrayList<Transition2>> getTransitions() { return transitions; }
 
@@ -41,13 +41,60 @@ public class Automate {
     public void print() {
 
         System.out.println("Initial state is:"+istate);
-        System.out.println("Final state is:"+fstate);
+        System.out.println("Final state is:"+astate);
 
         for(int state : transitions.keySet()){
             for(Transition2 t : transitions.get(state)){
                 System.out.println("State"+state+"-----"+t.getSymbol()+"-----"+t.getTostate());
             }
         }
+    }
+
+    public Automate parse(RegExTree tree) {
+
+        int stateCounter = 0;
+
+        if(tree.root == RegEx.CONCAT){
+            Automate leftConcat = parse(tree.subTrees.get(0));
+            Automate rightConcat = parse(tree.subTrees.get(1));
+
+            //Ajouter une transition 'ε' entre les 2 automates
+            leftConcat.addepsilontransition(leftConcat.astate , rightConcat.istate);
+
+            return new Automate(leftConcat.istate , rightConcat.astate);
+
+        }else if(tree.root == RegEx.ETOILE) {
+
+            Automate middleAut = parse(tree.subTrees.get(0));
+            int initialState = stateCounter++;
+            int acceptState = stateCounter++;
+            Automate etoileAut = new Automate(initialState , acceptState);
+
+            //L'ajout des 'ε' transitions
+            etoileAut.addepsilontransition(initialState , acceptState);
+            etoileAut.addepsilontransition(initialState , middleAut.istate);
+            etoileAut.addepsilontransition(middleAut.astate , middleAut.istate);
+            etoileAut.addepsilontransition(middleAut.astate, acceptState);
+
+            return etoileAut;
+        } else if(tree.root == RegEx.ALTERN){
+
+            Automate autR1 = parse(tree.subTrees.get(0));
+            Automate autR2 = parse(tree.subTrees.get(1));
+            int initialState = stateCounter++;
+            int acceptState = stateCounter++;
+            Automate alternAut = new Automate(initialState , acceptState);
+
+            //L'ajout des 'ε' transitions
+            alternAut.addepsilontransition(initialState , autR1.istate);
+            alternAut.addepsilontransition(initialState , autR2.istate);
+            alternAut.addepsilontransition(autR1.astate , acceptState);
+            alternAut.addepsilontransition(autR2.astate, acceptState);
+
+            return alternAut;
+        }
+
+        return null;
     }
 }
 
@@ -72,21 +119,5 @@ class Transition2 {
 
 }
 
-class RegEx3 {
-    static final int CONCAT = 0xC04CA7;
-    static final int ETOILE = 0xE7011E;
-    static final int ALTERN = 0xA17E54;
-    static final int PROTECTION = 0xBADDAD;
-}
-
-class RegExTree3 {
-    protected int root;
-    protected ArrayList<RegExTree3> subTrees;
-
-    public RegExTree3(int root, ArrayList<RegExTree3> subTrees) {
-        this.root = root;
-        this.subTrees = subTrees;
-    }
-}
 
 
