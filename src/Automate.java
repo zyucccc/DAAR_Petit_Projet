@@ -81,12 +81,33 @@ class State {
         this.epsilon_transitions = new HashSet<>();
     }
 
+    // ----------------------toString--------------------- //
     @Override
     public String toString() {
         return "State{" +
                 "id=" + id +
-                ", transitions=" + transitions +
+                ", transitions=" + transitionsToString() +
                 ", epsilon_transitions=" + epsilon_transitions +
                 '}';
     }
+
+    private String transitionsToString() {
+        StringBuilder sb = new StringBuilder("{");
+        for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
+            sb.append("label: ");
+            sb.append(entry.getKey()).append(" States :[");
+            for (State state : entry.getValue()) {
+                sb.append(state.id).append(", ");
+            }
+            if (!entry.getValue().isEmpty()) {
+                sb.setLength(sb.length() - 2);  // Remove last ", "
+            }
+            sb.append("], ");
+        }
+        if (!transitions.isEmpty()) {
+            sb.setLength(sb.length() - 2);  // Remove last ", "
+        }
+        return sb.append("}").toString();
+    }
+
 }
