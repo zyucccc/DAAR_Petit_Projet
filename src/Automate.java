@@ -56,10 +56,10 @@ public class Automate {
             Automate left = parse(tree.subTrees.get(0));
             Automate right = parse(tree.subTrees.get(1));
 //          mise a jour les final_States
-            State newFinal_left = new State(generer_Unique_State_id());
             for(State final_State : left.final_States){
                 final_State.isFinal = false;
-                final_State.ajouterEpsilonTransition(newFinal_left);
+                //lier left et right
+                final_State.ajouterEpsilonTransition(right.debut_State);
             }
 
             State newFinal_right = new State(generer_Unique_State_id());
@@ -67,9 +67,6 @@ public class Automate {
                 final_State.isFinal = false;
                 final_State.ajouterEpsilonTransition(newFinal_right);
             }
-
-//          lier left et right
-            newFinal_left.ajouterEpsilonTransition(right.debut_State);
 
             Automate result = new Automate();
             result.debut_State = left.debut_State;
@@ -79,18 +76,23 @@ public class Automate {
 // ----------------------------ETOILE---------------------------------------
         else if (tree.root == RegEx.ETOILE){
             Automate left = parse(tree.subTrees.get(0));
-//          mise a jour les final_States
-            State newFinal_left = new State(generer_Unique_State_id());
-            for(State final_State : left.final_States){
-                final_State.isFinal = false;
-                final_State.ajouterEpsilonTransition(newFinal_left);
-            }
 //          mise a jour les debut_States
             State newDebut_left = new State(generer_Unique_State_id());
             newDebut_left.ajouterEpsilonTransition(left.debut_State);
 
-//          dans le cas où on revient au debut de l'etoile pour repeter
-            newFinal_left.ajouterEpsilonTransition(newDebut_left);
+//          mise a jour les final_States
+            State newFinal_left = new State(generer_Unique_State_id());
+
+
+//            newFinal_left.ajouterEpsilonTransition(left.debut_State);
+            for(State final_State : left.final_States){
+                final_State.isFinal = false;
+                //dans le cas où on revient au debut de l'etoile pour repeter
+                final_State.ajouterEpsilonTransition(left.debut_State);
+                final_State.ajouterEpsilonTransition(newFinal_left);
+            }
+
+
 //          dans le cas où on saute directement a la fin de l'etoile
             newDebut_left.ajouterEpsilonTransition(newFinal_left);
 
@@ -99,7 +101,7 @@ public class Automate {
             result.final_States = Set.of(newFinal_left);
             return result;
         }
-// ----------------------------ETOILE---------------------------------------
+// ----------------------------DOT---------------------------------------
         else if (tree.root == RegEx.DOT){
             State newDebut = new State(generer_Unique_State_id());
             State newFinal = new State(generer_Unique_State_id());
@@ -165,7 +167,7 @@ public class Automate {
     }
 
     // ----------------------convertir à Dot file--------------------- //
-    // ex:   dot -Tpng automate.dot -o automate.png
+    // Bash commande:::  dot -Tpng automate.dot -o automate.png
     public void toDot() {
         StringBuilder sb = new StringBuilder();
         sb.append("digraph Automate {\n");
@@ -216,6 +218,7 @@ public class Automate {
         try {
             // Ensure the directory exists
             Files.createDirectories(Paths.get("./automate_out/"));
+            // dot file output path
             java.io.FileWriter fw = new java.io.FileWriter("./automate_out/automate.dot");
             fw.write(sb.toString());
             fw.close();
