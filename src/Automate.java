@@ -1,3 +1,5 @@
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -126,25 +128,19 @@ public class Automate {
             return result;
         }
     }
+    // ----------------------toString--------------------- //
 
-
-//    @Override
-//    public String toString() {
-//        return "Automate{ \n" +
-//                "debut_State= \n" + debut_State +
-//                " \n}";
-//    }
-@Override
-public String toString() {
-    StringBuilder sb = new StringBuilder();
-    Set<State> visited = new HashSet<>();
-    sb.append("Automate:\n");
-    sb.append("Start State: ").append(debut_State.getId()).append("\n");
-    sb.append("Final States: ").append(final_States.stream().map(State::getId).toList()).append("\n");
-    sb.append("States:\n");
-    printState(debut_State, sb, visited, 0);
-    return sb.toString();
-}
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        Set<State> visited = new HashSet<>();
+        sb.append("Automate:\n");
+        sb.append("Start State: ").append(debut_State.getId()).append("\n");
+        sb.append("Final States: ").append(final_States.stream().map(State::getId).toList()).append("\n");
+        sb.append("States:\n");
+        printState(debut_State, sb, visited, 0);
+        return sb.toString();
+    }
 
     private void printState(State state, StringBuilder sb, Set<State> visited, int indent) {
         if (visited.contains(state)) {
@@ -172,6 +168,67 @@ public String toString() {
             }
         }
     }
+
+    // ----------------------convertir à Dot file--------------------- //
+    // ex:   dot -Tpng automate.dot -o automate.png
+    public void toDot() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("digraph Automate {\n");
+        sb.append("  rankdir=LR;\n"); // Left to right
+        sb.append("  node [shape=circle];\n");
+
+        Set<Integer> visited = new HashSet<>();
+        Queue<State> queue = new LinkedList<>();
+        queue.add(debut_State);
+
+        // start state
+        sb.append("  start [shape=point];\n");
+        sb.append("  start -> ").append(debut_State.getId()).append(";\n");
+
+        // final states
+        for (State acceptState : final_States) {
+            sb.append("  ").append(acceptState.getId()).append(" [shape=doublecircle];\n");
+        }
+
+        while (!queue.isEmpty()) {
+            State state = queue.poll();
+            if (visited.contains(state.getId())) {
+                continue;
+            }
+            visited.add(state.getId());
+
+            // transitions
+            for (Map.Entry<Character, Set<State>> entry : state.getTransitions().entrySet()) {
+                char label = entry.getKey();
+                for (State dest : entry.getValue()) {
+                    sb.append("  ").append(state.getId()).append(" -> ").append(dest.getId())
+                            .append(" [label=\"").append(label).append("\"];\n");
+                    queue.add(dest);
+                }
+            }
+
+            // epsilon tansitions
+            for (State dest : state.getEpsilonTransitions()) {
+                sb.append("  ").append(state.getId()).append(" -> ").append(dest.getId())
+                        .append(" [label=\"ε\"];\n");
+                queue.add(dest);
+            }
+        }
+
+        sb.append("}\n");
+
+        //save dot file
+        try {
+            // Ensure the directory exists
+            Files.createDirectories(Paths.get("./automate_out/"));
+            java.io.FileWriter fw = new java.io.FileWriter("./automate_out/automate.dot");
+            fw.write(sb.toString());
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 
 //chaque State va stocker ses propres transtions a partir de lui meme
