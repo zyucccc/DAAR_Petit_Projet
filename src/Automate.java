@@ -67,17 +67,12 @@ public class Automate {
                 final_State.isFinal = false;
                 final_State.ajouterEpsilonTransition(newFinal_right);
             }
-//          mise a jour les debut_States
-            State newDebut_left = new State(generer_Unique_State_id());
-            newDebut_left.ajouterEpsilonTransition(left.debut_State);
 
-            State newDebut_right = new State(generer_Unique_State_id());
-            newDebut_right.ajouterEpsilonTransition(right.debut_State);
 //          lier left et right
-            newDebut_left.ajouterEpsilonTransition(newDebut_right);
+            newFinal_left.ajouterEpsilonTransition(right.debut_State);
 
             Automate result = new Automate();
-            result.debut_State = newDebut_left;
+            result.debut_State = left.debut_State;
             result.final_States = Set.of(newFinal_right);
             return result;
         }
