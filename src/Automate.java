@@ -241,7 +241,6 @@ class State {
 
     //Normal transitions
     public void ajouterTransition(char label,State dest){
-//        transitions.put(label,Set.of(dest));
         if (transitions.containsKey(label)){
             transitions.get(label).add(dest);
         }
