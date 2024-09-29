@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Automate {
     //unique id pour chaque instance de automate
     protected static final AtomicInteger unique_State_id = new AtomicInteger(0);
-    protected State debut_State;
+    private State debut_State;
     //final_States ou "accpeting states" sont les etats où l'automate peut s'arreter
     protected Set<State> final_States;
 
@@ -29,13 +29,13 @@ public class Automate {
             Automate left = parse(tree.subTrees.get(0));
             Automate right = parse(tree.subTrees.get(1));
 
-//          creer un nouveau etat debut pour les 2 etats de altern
+            //creer un nouveau etat debut pour les 2 etats de altern
             State newDebut = new State(generer_Unique_State_id());
             newDebut.ajouterEpsilonTransition(left.debut_State);
             newDebut.ajouterEpsilonTransition(right.debut_State);
 
             State newFinal = new State(generer_Unique_State_id());
-//          mise a jour des etats finaux pour les 2 sous_automates
+            //mise a jour des etats finaux pour les 2 sous_automates
             for(State final_State : left.final_States){
                 final_State.isFinal = false;
                 final_State.ajouterEpsilonTransition(newFinal);
@@ -55,7 +55,7 @@ public class Automate {
         else if (tree.root == RegEx.CONCAT){
             Automate left = parse(tree.subTrees.get(0));
             Automate right = parse(tree.subTrees.get(1));
-//          mise a jour les final_States
+            //mise a jour les final_States
             for(State final_State : left.final_States){
                 final_State.isFinal = false;
                 //lier left et right
@@ -76,15 +76,15 @@ public class Automate {
 // ----------------------------ETOILE---------------------------------------
         else if (tree.root == RegEx.ETOILE){
             Automate left = parse(tree.subTrees.get(0));
-//          mise a jour les debut_States
+            //mise a jour les debut_States
             State newDebut_left = new State(generer_Unique_State_id());
             newDebut_left.ajouterEpsilonTransition(left.debut_State);
 
-//          mise a jour les final_States
+            //mise a jour les final_States
             State newFinal_left = new State(generer_Unique_State_id());
 
 
-//            newFinal_left.ajouterEpsilonTransition(left.debut_State);
+            //newFinal_left.ajouterEpsilonTransition(left.debut_State);
             for(State final_State : left.final_States){
                 final_State.isFinal = false;
                 //dans le cas où on revient au debut de l'etoile pour repeter
@@ -93,7 +93,7 @@ public class Automate {
             }
 
 
-//          dans le cas où on saute directement a la fin de l'etoile
+            //dans le cas où on saute directement a la fin de l'etoile
             newDebut_left.ajouterEpsilonTransition(newFinal_left);
 
             Automate result = new Automate();
@@ -105,7 +105,7 @@ public class Automate {
         else if (tree.root == RegEx.DOT){
             State newDebut = new State(generer_Unique_State_id());
             State newFinal = new State(generer_Unique_State_id());
-//          label tansition
+            //label of tansition
             newDebut.ajouterTransition((char)tree.root,newFinal);
 
             Automate result = new Automate();
@@ -116,7 +116,7 @@ public class Automate {
         else {
             State newDebut = new State(generer_Unique_State_id());
             State newFinal = new State(generer_Unique_State_id());
-//          label tansition
+            //label of tansition
             newDebut.ajouterTransition((char)tree.root,newFinal);
 
             Automate result = new Automate();
@@ -125,7 +125,14 @@ public class Automate {
             return result;
         }
     }
-    // ----------------------toString--------------------- //
+
+    //----------------------------Getters-----------------------------//
+    public State getDebut_State() {
+        return this.debut_State;
+    }
+
+
+    // --------------------------toString----------------------------- //
 
     @Override
     public String toString() {
@@ -301,6 +308,22 @@ class State {
 
     public Set<State> getEpsilonTransitions() {
         return this.epsilon_transitions;
+    }
+
+    // ----------------------equals & hashCode--------------------- //
+    // pour realiser les comparaison correctement entre Set<State>
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        State state = (State) o;
+        return id == state.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 }

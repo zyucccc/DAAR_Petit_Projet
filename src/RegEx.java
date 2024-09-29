@@ -42,10 +42,18 @@ public class RegEx {
             try {
                 RegExTree ret = parse();
                 System.out.println("  >> Tree result: "+ret.toString()+".");
+                System.out.println("  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
                 System.out.println("  Automate start: ");
                 Automate automate = new Automate(ret);
                 automate.toDot();
-                System.out.println("  Automate result: \n"+automate.toString());
+//                System.out.println("  Automate result: \n"+automate.toString());
+
+                System.out.println("  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                System.out.println("  DFA start: ");
+                DFA dfa = new DFA(automate);
+                dfa.toDot();
+
+
             } catch (Exception e) {
                 System.err.println("  >> ERROR: syntax error for regEx \""+regEx+"\".");
             }
