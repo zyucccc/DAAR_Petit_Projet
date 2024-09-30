@@ -11,9 +11,7 @@ public class DFA {
     //final_States ou "accpeting states" sont les etats où l'automate peut s'arreter
     protected Set<DFA_State> final_States;
 
-//    Map<Set<State>,DFA_State> dfa_registre = new HashMap<>();
-
-
+    //------------------------------Constructeur-----------------------------------//
     public DFA(DFA_State debut_State, Set<DFA_State> final_States){
         this.debut_State = debut_State;
         this.final_States = final_States;
@@ -25,21 +23,29 @@ public class DFA {
         this.final_States = dfa.final_States;
     }
 
+    //unique id pour chaque instance de automate
     public int generer_Unique_State_id(){
         return unique_State_id.getAndIncrement();
     }
 
+    //-------------------------------Methode de transformer l'automate NFA à DFA---------------------------------//
     protected DFA transformer_fromNFA(Automate nfa){
+        //registre globale pour stocker les "etat" de DFA_State
+        //ex: Pour chaque subset de states de NFA, on a un DFA_State unique
         Map<Set<State>,DFA_State> dfa_registre = new HashMap<>();
+        //worklist pour les states de DFA à traiter
         Set<DFA_State> worklist = new HashSet<>();
 
+        //calculer le premier state de DFA à partir de l'ensemble de l'episilon-closure de state de debut de NFA
         DFA_State dfa_debut_state = reduire_Episilon_Closutre(nfa.getDebut_State(),dfa_registre);
+        //stocker l'info de cette state_DFA dans le registre
         dfa_registre.put(dfa_debut_state.getSubStates(), dfa_debut_state);
 
         Set<DFA_State> dfa_final_states = new HashSet<>();
 
         Map<Character, Set<State>> transitions_subState = parse(dfa_debut_state);
 
+        //calculer les states suivants et mettre à jour le registre
         for (Character label : transitions_subState.keySet()){
             Set<State> next_subSet = transitions_subState.get(label);
             DFA_State next_dfa_state = reduire_Episilon_Closutre(next_subSet,dfa_registre);
@@ -54,6 +60,8 @@ public class DFA {
                 dfa_debut_state.getTransitions().put(label, existing_dfa_state);
             }
         }
+
+        //traiter le workliste
 
         while (!worklist.isEmpty()){
             DFA_State current_dfa_state = worklist.iterator().next();
@@ -85,6 +93,7 @@ public class DFA {
         return dfa;
     }
 
+    //calculer l'ensemble de l'episilon-closure etant donnee une seule state NFA
     protected DFA_State reduire_Episilon_Closutre(State state,Map<Set<State>,DFA_State> dfa_registre){
         DFA_State dfa_state = new DFA_State(generer_Unique_State_id());
 
@@ -93,6 +102,7 @@ public class DFA {
         closure.add(state);
         stack.push(state);
 
+        //ajouter tous les states atteignables par epsilon transitions recursivement
         while(!stack.isEmpty()){
             State s = stack.pop();
             if(s.isFinal && !dfa_state.isFinal)
@@ -113,6 +123,7 @@ public class DFA {
         return dfa_state;
     }
 
+    //calculer l'ensemble de l'episilon-closure etant donnee une ensemble de states NFA
     protected DFA_State reduire_Episilon_Closutre(Set<State> states,Map<Set<State>,DFA_State> dfa_registre){
         DFA_State dfa_state = new DFA_State(generer_Unique_State_id());
 
@@ -121,6 +132,7 @@ public class DFA {
         for(State state : states)
             stack.push(state);
 
+        //ajouter tous les states atteignables par epsilon transitions recursivement
         while(!stack.isEmpty()){
             State s = stack.pop();
             if(s.isFinal && !dfa_state.isFinal)
@@ -140,6 +152,7 @@ public class DFA {
         return dfa_state;
     }
 
+    //parser une state NFA,calculer les transitions possibles
     protected Map<Character,Set<State>> parse(DFA_State dfa_state){
         Set<Character> labels = dfa_state.get_labels();
         Map<Character, Set<State>> transitions_subState = new HashMap<>();

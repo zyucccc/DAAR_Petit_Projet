@@ -46,7 +46,7 @@ public class RegEx {
                 System.out.println("  Automate start: ");
                 Automate automate = new Automate(ret);
                 automate.toDot();
-//                System.out.println("  Automate result: \n"+automate.toString());
+                System.out.println("  Automate result: \n"+automate.toString());
 
                 System.out.println("  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
                 System.out.println("  DFA start: ");
