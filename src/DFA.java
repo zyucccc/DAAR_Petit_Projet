@@ -62,8 +62,8 @@ public class DFA {
         }
 
         //traiter le workliste
-
         while (!worklist.isEmpty()){
+            //pop un state_DFA de worklist et le traiter
             DFA_State current_dfa_state = worklist.iterator().next();
             worklist.remove(current_dfa_state);
 
@@ -72,16 +72,22 @@ public class DFA {
                 Set<State> next_subSet = transitions_subState.get(label);
                 DFA_State next_dfa_state = reduire_Episilon_Closutre(next_subSet,dfa_registre);
 
+                //si la state generée n'est pas dans le registre, on le traite et ajoute
                 if(!dfa_registre.containsKey(next_dfa_state.getSubStates())) {
                     dfa_registre.put(next_dfa_state.getSubStates(), next_dfa_state);
 
+                    //check si cet nouveau state est final,si oui on ajoute dans dfa_final_states
                     if (next_dfa_state.isFinal) {
                         dfa_final_states.add(next_dfa_state);
                     }
+                    //mise a jour les transitions de current_dfa_state
                     current_dfa_state.getTransitions().put(label, next_dfa_state);
+                    //ajouter les nouveaux states à la worklist
                     if (!worklist.contains(next_dfa_state)){
                         worklist.add(next_dfa_state);
                     }
+                    //sinon,si une state_dfa est deja registre dans le registre pour cette ensemble de states nfa
+                    //on utilise celui existant dans le registre
                 }else {
                     DFA_State existing_dfa_state = dfa_registre.get(next_dfa_state.getSubStates());
                     current_dfa_state.getTransitions().put(label, existing_dfa_state);
