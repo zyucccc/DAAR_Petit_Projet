@@ -10,6 +10,8 @@ public class DFA {
     protected DFA_State debut_State;
     //final_States ou "accpeting states" sont les etats où l'automate peut s'arreter
     protected Set<DFA_State> final_States;
+    private Map<Set<State>,DFA_State> dfa_registre = new HashMap<>();
+
 
     //------------------------------Constructeur-----------------------------------//
     public DFA(DFA_State debut_State, Set<DFA_State> final_States){
@@ -21,12 +23,41 @@ public class DFA {
         DFA dfa = transformer_fromNFA(nfa);
         this.debut_State = dfa.debut_State;
         this.final_States = dfa.final_States;
+        this.dfa_registre = dfa.dfa_registre;
     }
 
     //unique id pour chaque instance de automate
     public int generer_Unique_State_id(){
         return unique_State_id.getAndIncrement();
     }
+
+    //-------------------------------Getter-----------------------------------//
+    public Map<Set<State>,DFA_State> getDfa_registre() {
+        return this.dfa_registre;
+    }
+
+    public Set<DFA_State> getAllStates(){
+        Set<DFA_State> allStates = new HashSet<>();
+        for(DFA_State state : dfa_registre.values()){
+//            System.err.println("ajouteId:"+state.getId());
+            allStates.add(state);
+        }
+        return allStates;
+    }
+
+    public Set<Character> getAllInputSymbols() {
+        Set<Character> symbols = new HashSet<>();
+        for (DFA_State state : getAllStates()) {
+            symbols.addAll(state.getTransitions().keySet());
+        }
+        return symbols;
+    }
+
+    //-------------------------------Updater-----------------------------------//
+    public void add_registre(DFA_State state){
+        this.dfa_registre.put(state.getSubStates(),state);
+    }
+
 
     //-------------------------------Methode de transformer l'automate NFA à DFA---------------------------------//
     protected DFA transformer_fromNFA(Automate nfa){
@@ -42,6 +73,9 @@ public class DFA {
         dfa_registre.put(dfa_debut_state.getSubStates(), dfa_debut_state);
 
         Set<DFA_State> dfa_final_states = new HashSet<>();
+        if(dfa_debut_state.isFinal){
+            dfa_final_states.add(dfa_debut_state);
+        }
 
         Map<Character, Set<State>> transitions_subState = parse(dfa_debut_state);
 
@@ -50,6 +84,8 @@ public class DFA {
             Set<State> next_subSet = transitions_subState.get(label);
             DFA_State next_dfa_state = reduire_Episilon_Closutre(next_subSet,dfa_registre);
             if(!dfa_registre.containsKey(next_dfa_state.getSubStates())) {
+                dfa_registre.put(next_dfa_state.getSubStates(), next_dfa_state);
+
                 if (next_dfa_state.isFinal) {
                     dfa_final_states.add(next_dfa_state);
                 }
@@ -96,6 +132,8 @@ public class DFA {
         }
 
         DFA dfa = new DFA(dfa_debut_state, dfa_final_states);
+        int size = dfa_registre.size();
+        dfa.dfa_registre = dfa_registre;
         return dfa;
     }
 
@@ -111,8 +149,11 @@ public class DFA {
         //ajouter tous les states atteignables par epsilon transitions recursivement
         while(!stack.isEmpty()){
             State s = stack.pop();
-            if(s.isFinal && !dfa_state.isFinal)
+//            System.err.println("state:"+s.getId()+"for :"+s.isFinal);
+            if(s.isFinal && !dfa_state.isFinal) {
+//                System.err.println("final state:" + s.getId()+" for "+dfa_state.getId());
                 dfa_state.isFinal = true;
+            }
 
             for(State e : s.getEpsilonTransitions()){
                 if(!closure.contains(e)){
@@ -141,8 +182,12 @@ public class DFA {
         //ajouter tous les states atteignables par epsilon transitions recursivement
         while(!stack.isEmpty()){
             State s = stack.pop();
-            if(s.isFinal && !dfa_state.isFinal)
+//            System.err.println("state:"+s.getId()+"for :"+s.isFinal);
+            if(s.isFinal && !dfa_state.isFinal) {
+//                System.err.println("final state:" + s.getId() + " for " + dfa_state.getId());
                 dfa_state.isFinal = true;
+            }
+
             for(State e : s.getEpsilonTransitions()){
                 if(!closure.contains(e)){
                     closure.add(e);
@@ -244,6 +289,8 @@ class DFA_State {
     //boolean qui indique si l'etat est final
     protected boolean isFinal = false;
 
+    //------------------------------Constructeur-----------------------------------//
+
     public DFA_State(int id){
         this.id = id;
         this.transitions = new HashMap<>();
@@ -257,7 +304,7 @@ class DFA_State {
     }
 
 
-    //get all possible labels for the sub states
+    //get all possible labels from the substates
     public Set<Character> get_labels(){
         Set<Character> labels = new HashSet<>();
         for (State state : subStates){
@@ -297,7 +344,17 @@ class DFA_State {
         return this.transitions;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        DFA_State other = (DFA_State) obj;
+        return id == other.id;
+    }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
 }

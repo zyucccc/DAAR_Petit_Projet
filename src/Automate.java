@@ -35,6 +35,7 @@ public class Automate {
             newDebut.ajouterEpsilonTransition(right.debut_State);
 
             State newFinal = new State(generer_Unique_State_id());
+            newFinal.isFinal = true;
             //mise a jour des etats finaux pour les 2 sous_automates
             for(State final_State : left.final_States){
                 final_State.isFinal = false;
@@ -63,6 +64,7 @@ public class Automate {
             }
 
             State newFinal_right = new State(generer_Unique_State_id());
+            newFinal_right.isFinal = true;
             for(State final_State : right.final_States){
                 final_State.isFinal = false;
                 final_State.ajouterEpsilonTransition(newFinal_right);
@@ -82,6 +84,7 @@ public class Automate {
 
             //mise a jour les final_States
             State newFinal_left = new State(generer_Unique_State_id());
+            newFinal_left.isFinal = true;
 
 
             //newFinal_left.ajouterEpsilonTransition(left.debut_State);
@@ -105,6 +108,7 @@ public class Automate {
         else if (tree.root == RegEx.DOT){
             State newDebut = new State(generer_Unique_State_id());
             State newFinal = new State(generer_Unique_State_id());
+            newFinal.isFinal = true;
             //label of tansition
             newDebut.ajouterTransition((char)tree.root,newFinal);
 
@@ -116,6 +120,7 @@ public class Automate {
         else {
             State newDebut = new State(generer_Unique_State_id());
             State newFinal = new State(generer_Unique_State_id());
+            newFinal.isFinal = true;
             //label of tansition
             newDebut.ajouterTransition((char)tree.root,newFinal);
 

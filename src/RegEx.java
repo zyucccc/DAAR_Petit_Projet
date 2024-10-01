@@ -52,6 +52,10 @@ public class RegEx {
                 System.out.println("  DFA start: ");
                 DFA dfa = new DFA(automate);
                 dfa.toDot();
+                //test add Dead State
+                DFAmini mini = new DFAmini();
+                DFA dfa_with_dead_state = mini.addDeadState(dfa);
+//                dfa_with_dead_state.toDot();
 
 
             } catch (Exception e) {
