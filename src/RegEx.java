@@ -54,11 +54,14 @@ public class RegEx {
                 dfa.toDot();
                 //test add Dead State
                 DFAmini mini = new DFAmini();
-                DFA dfa_with_dead_state = mini.addDeadState(dfa);
+                DFA DFA_minimisation = mini.minimize(dfa);
+                DFA_minimisation.toDot();
+//                DFA dfa_with_dead_state = mini.addDeadState(dfa);
 //                dfa_with_dead_state.toDot();
 
 
             } catch (Exception e) {
+                System.err.println("cause: "+e.toString());
                 System.err.println("  >> ERROR: syntax error for regEx \""+regEx+"\".");
             }
         }

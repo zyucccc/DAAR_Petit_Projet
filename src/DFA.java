@@ -26,6 +26,11 @@ public class DFA {
         this.dfa_registre = dfa.dfa_registre;
     }
 
+    public DFA(){
+        this.debut_State = null;
+        this.final_States = new HashSet<>();
+    }
+
     //unique id pour chaque instance de automate
     public int generer_Unique_State_id(){
         return unique_State_id.getAndIncrement();
