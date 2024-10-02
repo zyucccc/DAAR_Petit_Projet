@@ -1,3 +1,5 @@
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 //---------------------Logique de Minimisation de DFA---------------------//
@@ -66,7 +68,7 @@ public class DFAmini {
                 }
             }
         }
-        System.err.println("table_association: " + table_association);
+        System.out.println("table_association: " + table_association);
 
         //---------------------Fusionner les states equivalent,Build new DFA mini---------------------//
         return build_DFAmini(dfa, table_association);
@@ -211,7 +213,7 @@ public class DFAmini {
 
     public DFA addDeadState(DFA dfa) {
         Set<Character> inputSymbols = dfa.getAllInputSymbols();
-        System.err.println("inputSymbols: " + inputSymbols);
+//        System.err.println("inputSymbols: " + inputSymbols);
 
         Set<State> DEAD_Satate_Mark = Collections.emptySet();
         DFA_State deadState = new DFA_State(-1,DEAD_Satate_Mark); // id for dead state: -1
@@ -234,8 +236,63 @@ public class DFAmini {
         return dfa;
     }
 
+    // ----------------------convertir à Dot file--------------------- //
+    // Bash commande:::  dot -Tpng automateDFA.dot -o automateDFA.png
+    public void toDot(DFA dfa_mini) {
+        DFA_State debut_State = dfa_mini.debut_State;
+        Set<DFA_State> final_States = dfa_mini.final_States;
 
+        StringBuilder sb = new StringBuilder();
+        sb.append("digraph Automate {\n");
+        sb.append("  rankdir=LR;\n"); // Left to right
+        sb.append("  node [shape=circle];\n");
 
+        Set<Integer> visited = new HashSet<>();
+        Queue<DFA_State> queue = new LinkedList<>();
+        queue.add(debut_State);
+
+        // start state
+        sb.append("  start [shape=point];\n");
+        sb.append("  start -> ").append(debut_State.getId()).append(";\n");
+
+        // final states
+        for (DFA_State acceptState : final_States) {
+            sb.append("  ").append(acceptState.getId()).append(" [shape=doublecircle];\n");
+        }
+
+        while (!queue.isEmpty()) {
+            DFA_State state = queue.poll();
+            if (visited.contains(state.getId())) {
+                continue;
+            }
+            visited.add(state.getId());
+
+            // transitions
+            for (Map.Entry<Character, DFA_State> entry : state.getTransitions().entrySet()) {
+                char label = entry.getKey();
+                DFA_State dest = entry.getValue();
+                sb.append("  ").append(state.getId()).append(" -> ").append(dest.getId())
+                        .append(" [label=\"").append(label).append("\"];\n");
+                queue.add(dest);
+
+            }
+
+        }
+
+        sb.append("}\n");
+
+        //save dot file
+        try {
+            // Ensure the directory exists
+            Files.createDirectories(Paths.get("./automate_out/"));
+            // dot file output path
+            java.io.FileWriter fw = new java.io.FileWriter("./automate_out/automateDFA_MINI.dot");
+            fw.write(sb.toString());
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //--------------------------------------------Pair_DFA_State--------------------------------------------//

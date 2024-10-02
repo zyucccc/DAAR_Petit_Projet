@@ -5,9 +5,7 @@ digraph Automate {
   start -> 100;
   101 [shape=doublecircle];
   102 [shape=doublecircle];
-  103 [shape=doublecircle];
   100 -> 101 [label="a"];
   100 -> 102 [label="b"];
-  102 -> 103 [label="c"];
-  103 -> 103 [label="c"];
+  102 -> 102 [label="c"];
 }

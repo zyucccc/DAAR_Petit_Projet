@@ -52,12 +52,11 @@ public class RegEx {
                 System.out.println("  DFA start: ");
                 DFA dfa = new DFA(automate);
                 dfa.toDot();
-                //test add Dead State
+                System.out.println("  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                System.out.println("  DFA Minimisation start: ");
                 DFAmini mini = new DFAmini();
                 DFA DFA_minimisation = mini.minimize(dfa);
-                DFA_minimisation.toDot();
-//                DFA dfa_with_dead_state = mini.addDeadState(dfa);
-//                dfa_with_dead_state.toDot();
+                mini.toDot(DFA_minimisation);
 
 
             } catch (Exception e) {
