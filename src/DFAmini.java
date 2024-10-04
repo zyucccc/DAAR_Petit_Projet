@@ -96,6 +96,8 @@ public class DFAmini {
         }
     }
 
+    //------------------------------------create equivalent classes------------------------------------//
+    //creer les classes equivalentes à partir du tableau d'association
     private Map<DFA_State,Set<DFA_State>> create_equivalent_classes(DFA dfa,Map<Pair_DFA_State, Boolean> table_association){
         Map<DFA_State,Set<DFA_State>> equivalent_classes = new HashMap<>();
         //initialiser les classes equivalentes (creer une classe pour chaque state,ajouter le state-meme dans sa classe)
@@ -143,6 +145,8 @@ public class DFAmini {
         return map_state_fusionee;
     }
 
+    //--------------------------------build new DFA mini--------------------------------//
+    //construire une nouvelle DFA mini à partir de 2 mapping: map_state_fusionee et map_old_new
     private DFA build_DFAmini(DFA dfa_withDeadState,Map<Pair_DFA_State, Boolean> table_association){
         //creer les classes equivalentes
         Map<DFA_State,Set<DFA_State>> equivalent_classes = create_equivalent_classes(dfa_withDeadState,table_association);
@@ -160,7 +164,7 @@ public class DFAmini {
             DFA_State representative = map_state_fusionee.get(propre_equivalent_class);
             map_old_new.put(state,representative);
         }
-//        System.err.println("Ca passe!");
+
         //debut/final state
         Set<DFA_State> newStates = new HashSet<>(map_old_new.values());
         Set<DFA_State> new_FinalStates = new HashSet<>();
@@ -195,6 +199,8 @@ public class DFAmini {
         return new DFA(new_StartState,new_FinalStates);
     }
 
+    //------------------------------delete transition to dead state------------------------------//
+    //delete transitions to dead state pour rendre la graphe finale clean
     private void delete_transition_toDeadState(DFA_State state){
         Set<Character> symbolsToRemove = new HashSet<>();
 
@@ -211,9 +217,12 @@ public class DFAmini {
         }
     }
 
+
+    //--------------------------add dead state to DFA--------------------------//
+    //pour faire la minimisation,il faut d'abord ajouter une Dead State
+    //reference: Page 555 Aho et Ullman
     public DFA addDeadState(DFA dfa) {
         Set<Character> inputSymbols = dfa.getAllInputSymbols();
-//        System.err.println("inputSymbols: " + inputSymbols);
 
         Set<State> DEAD_Satate_Mark = Collections.emptySet();
         DFA_State deadState = new DFA_State(-1,DEAD_Satate_Mark); // id for dead state: -1

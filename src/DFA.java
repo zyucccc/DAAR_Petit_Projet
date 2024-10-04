@@ -36,6 +36,25 @@ public class DFA {
         return unique_State_id.getAndIncrement();
     }
 
+    //-------------------------------Trainter texte-----------------------------------//
+    //Traiter le texte (une ligne) avec l'automate
+    public boolean traite_texte(String texte) {
+        for (int startIndex = 0; startIndex < texte.length(); startIndex++) {
+            DFA_State current_state = debut_State;
+            for (int i = startIndex; i < texte.length(); i++) {
+                char c = texte.charAt(i);
+                if (!current_state.getTransitions().containsKey(c)) {
+                    break;
+                }
+                current_state = current_state.getTransitions().get(c);
+                if (current_state.isFinal) {
+                    return true;  // des que on trouve une occurence de pattern, on retourne true
+                }
+            }
+        }
+        return false;
+    }
+
     //-------------------------------Getter-----------------------------------//
     public Map<Set<State>,DFA_State> getDfa_registre() {
         return this.dfa_registre;
