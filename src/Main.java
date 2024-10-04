@@ -1,4 +1,4 @@
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -52,33 +52,136 @@ public class Main {
                 String path = scanner2.nextLine();
                 System.out.println("Le path est: " + path);
 
+                //ex test:S(a|g|r)*on
                 //pour valider que le resultat soit correcte,on peut faire egrep simultanement
                 //egrep -c 'pattern' test.txt
+                List<String> lines = null;
                 try {
-                    // record start time
-                    long startTime = System.currentTimeMillis();
-
                     // open file et lire ligne par ligne
-                    List<String> lines = Files.readAllLines(Paths.get(path));
-                    int matchedLines = 0;
+                    lines = Files.readAllLines(Paths.get(path));
+                } catch (IOException e) {
+                    System.err.println("Erreur lors de la lecture du fichier: " + e.getMessage());
+                }
+                //---------------------------------Traitement de texte avec DFA-------------------------------//
+                int matchedLines_DFA = 0;
+                long total_duration_DFA = 0;
+                for(int i=0;i<5;i++) {
+                    // record start time
+                    long startTime_DFA = System.currentTimeMillis();
 
                     for (String line : lines) {
-                        if (DFA_minimisation.traite_texte(line)) {
+                        if (dfa.traite_texte(line)) {
                             System.out.println(line);
-                            matchedLines++;
+                            matchedLines_DFA++;
                         }
                     }
 
                     // record end time
-                    long endTime = System.currentTimeMillis();
-                    long duration = endTime - startTime;
+                    long endTime_DFA = System.currentTimeMillis();
+                    long duration_DFA = endTime_DFA - startTime_DFA;
+                    total_duration_DFA += duration_DFA;
+                }
+                matchedLines_DFA = matchedLines_DFA / 5;
+                long average_duration_DFA = total_duration_DFA / 5;
 
-                    // synthese
-                    System.out.println("Total matching lines: " + matchedLines);
-                    System.out.println("Total time taken: " + duration + " milliseconds");
+                //---------------------------------Traitement de texte avec DFA Minimum-------------------------------//
+                int matchedLines_DFA_mini = 0;
+                long total_duration_DFA_mini = 0;
+                for(int i=0;i<5;i++) {
+                    // record start time
+                    long startTime_DFA_mini = System.currentTimeMillis();
 
-                } catch (IOException e) {
-                    System.err.println("Erreur lors de la lecture du fichier: " + e.getMessage());
+                    for (String line : lines) {
+                        if (DFA_minimisation.traite_texte(line)) {
+                            System.out.println(line);
+                            matchedLines_DFA_mini++;
+                        }
+                    }
+
+                    // record end time
+                    long endTime_DFA_mini = System.currentTimeMillis();
+                    long duration_DFA_mini = endTime_DFA_mini - startTime_DFA_mini;
+                    total_duration_DFA_mini += duration_DFA_mini;
+                }
+                matchedLines_DFA_mini = matchedLines_DFA_mini / 5;
+                long average_duration_DFA_mini = total_duration_DFA_mini / 5;
+
+
+                //-----------------------------------Traitement de texte avec egrep---------------------------------//
+                int matchedLines_egrep = 0;
+                long total_duration_egrep = 0;
+                for(int i=0;i<5;i++) {
+                    // record start time
+                    long startTime_egrep = System.currentTimeMillis();
+
+                    // execute egrep command
+                    try {
+                        ProcessBuilder processBuilder = new ProcessBuilder("egrep", "-c", regEx, path);
+                        Process process = processBuilder.start();
+
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                        String output = reader.readLine();
+                        if (output != null) {
+                            matchedLines_egrep = Integer.parseInt(output);
+                        }
+
+                        int exitCode = process.waitFor();
+                        if (exitCode != 0) {
+                            System.err.println("egrep command failed with exit code: " + exitCode);
+                        }
+                    } catch (IOException | InterruptedException e) {
+                        System.err.println("Error executing egrep: " + e.getMessage());
+                    }
+
+                    // record end time
+                    long endTime_egrep = System.currentTimeMillis();
+                    long duration_egrep = endTime_egrep - startTime_egrep;
+                    total_duration_egrep += duration_egrep;
+                }
+                long average_duration_egrep = total_duration_egrep / 5;
+
+                // synthese DFA
+                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>Synthese of DFA<<<<<<<<<<<<<<<<<<<<<<<<<<");
+                System.out.println("Total matching lines with DFA: " + matchedLines_DFA);
+                System.out.println("Average time taken with DFA: " + average_duration_DFA + " milliseconds");
+
+                // synthese DFA mini
+                System.out.println(">>>>>>>>>>>>>>>>>>>>>Synthese of DFA mini<<<<<<<<<<<<<<<<<<<<<<<");
+                System.out.println("Total matching lines with DFA mini: " + matchedLines_DFA_mini);
+                System.out.println("Average time taken with DFA mini: " + average_duration_DFA_mini + " milliseconds");
+
+                // synthese egrep pour valider le resultat
+                System.out.println(">>>>>>>>>>>>>>>>>>>>>Synthese of egrep<<<<<<<<<<<<<<<<<<<<<<<<<");
+                System.out.println("Total matching lines with egrep: " + matchedLines_egrep);
+                System.out.println("Average time taken with egrep: " + average_duration_egrep + " milliseconds");
+
+                if(matchedLines_DFA_mini == matchedLines_DFA && matchedLines_DFA == matchedLines_egrep){
+                    System.out.println(">>>>>>>>>>>>>>>>>>>>>Resultat<<<<<<<<<<<<<<<<<<<<<<<<<");
+                    System.out.println(">>>>>>>>>Bravo! Les resultats sont correctes");
+                }
+
+                if(matchedLines_DFA_mini != 0) {
+                    // output .csv
+                    String csvFilePath = "performance_results_automate.csv";
+                    boolean fileExists = new File(csvFilePath).exists();
+
+                    try (FileWriter writer = new FileWriter(csvFilePath, true)) {
+                        // s'il n'existe pas, écrire l'en-tête les noms des colonnes
+                        if (!fileExists) {
+                            writer.append("Pattern,DFA Avg Time (ms),DFA Mini Avg Time (ms),Egrep Avg Time (ms)\n");
+                        }
+
+                        // append les résultats a la fin du fichier
+                        writer.append(String.format("%s,%d,%d,%d\n",
+                                regEx,
+                                average_duration_DFA,
+                                average_duration_DFA_mini,
+                                average_duration_egrep));
+
+                        System.out.println("CSV file has been updated successfully.");
+                    } catch (IOException e) {
+                        System.err.println("Error writing to CSV file: " + e.getMessage());
+                    }
                 }
 
 
