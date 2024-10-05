@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.FileWriter;
 
-
 public class RechercheMotif {
 
     // Algo de KMP pour chercher toutes les occurrences d'un motif dans un texte
@@ -28,18 +27,17 @@ public class RechercheMotif {
                 i++;
             }
             if (j == m) {
-                occurrences.add(i - j); // Store occurrence index
+                occurrences.add(i - j); // Stocker l'indice de l'occurrence
                 j = lps[j - 1];
             } else if (i < t && motif.charAt(j) != txt.charAt(i)) {
                 if (j != 0) {
                     j = lps[j - 1];
                 } else {
-                    i = i + 1;
+                    i++;
                 }
             }
         }
         return occurrences;
-
     }
 
     public static void calculerLPS(String motif, int m, int[] lps) {
@@ -63,71 +61,40 @@ public class RechercheMotif {
         }
     }
 
-
-    // Algo naif pour chercher toutes les occurrences d'un motif dans un texte
-    public static List<Integer> naivealgo(String txt, String motif) {
-        List<Integer> occurrences = new ArrayList<>();
-        int t = txt.length();
-        int m = motif.length();
-
-        for (int i = 0; i <= t - m; i++) {
-            int j;
-            for (j = 0; j < m; j++) {
-                if (txt.charAt(i + j) != motif.charAt(j)) {
-                    break;
-                }
-            }
-            if (j == m) {
-                occurrences.add(i);  // Store occurrence index
-            }
-        }
-        return occurrences;  // Return all occurrences
-    }
-
-    // focntion qui calcule la durée d'execution pour chaque algo
-    public static long duree(String txt, String motif, boolean useKMP) {
+    // fonction qui calcule la durée d'exécution pour KMP
+    public static long duree(String txt, String motif) {
         long startTime = System.nanoTime();
 
-        if (useKMP) {
-            KMPalgo(txt, motif);  // Use KMP algorithm
-        } else {
-            naivealgo(txt, motif);  // Use naive algorithm
-        }
+        KMPalgo(txt, motif);  // Utiliser l'algorithme KMP
 
         long endTime = System.nanoTime();
         return endTime - startTime;
     }
 
-    // fonction pour lire le contenu d'un fichier comme un string
+    // fonction pour lire le contenu d'un fichier comme une chaîne de caractères
     public static String readFileAsString(String filePath) throws IOException {
         return new String(Files.readAllBytes(Paths.get(filePath)));
     }
 
-    public static void chercherPlusieursMotifs(String txt, List<String> motifs, boolean useKMP, String outputFile) throws IOException{
+    // Rechercher plusieurs motifs et écrire les résultats dans un fichier
+    public static void chercherPlusieursMotifs(String txt, List<String> motifs, String outputFile) throws IOException {
 
         FileWriter writer = new FileWriter(outputFile);
 
         // Écrire l'en-tête du fichier CSV
-        writer.append("Motif,Temps d'exécution (nanosecondes)\n");
+        writer.append("Motif,Temps d'exécution (nanosecondes),Nombre d'occurrences\n");
 
         for (String motif : motifs) {
             System.out.println("\nRecherche du motif : " + motif);
 
-            long execTime = duree(txt, motif, useKMP);
-            List<Integer> occurrences;
+            long execTime = duree(txt, motif);
+            List<Integer> occurrences = KMPalgo(txt, motif);
 
-            if (useKMP) {
-                occurrences = KMPalgo(txt, motif);
-                System.out.println("Temps d'exécution de KMP : " + execTime + " nanosecondes");
-            } else {
-                occurrences = naivealgo(txt, motif);
-                System.out.println("Temps d'exécution de l'algorithme naïf : " + execTime + " nanosecondes");
-            }
-
+            System.out.println("Temps d'exécution de KMP : " + execTime + " nanosecondes");
             System.out.println("Le motif '" + motif + "' a été trouvé " + occurrences.size() + " fois.");
 
             // Écrire les résultats dans le fichier CSV
-            writer.append(motif).append(",").append(Long.toString(execTime)).append("\n");
+            writer.append(motif).append(",").append(Long.toString(execTime)).append(",").append(Integer.toString(occurrences.size())).append("\n");
 
             // Afficher les lignes où le motif est trouvé
             String[] lines = txt.split("\n");
@@ -149,18 +116,15 @@ public class RechercheMotif {
         writer.close();
     }
 
-
     public static void main(String[] args) {
-        if (args.length < 2) {
-            System.out.println("Usage: java RechercheMotif <file_path> <motif1> <motif2> ... <motifN>");
-            return;
-        }
+        // le chemin du fichier texte
+        String filePath = "/Users/ghitamikou/Desktop/test.txt";
 
-        String filePath = args[0];
+        // les motifs à chercher
         List<String> motifs = new ArrayList<>();
-        for (int i = 1; i < args.length; i++) {
-            motifs.add(args[i]);
-        }
+        motifs.add("from");
+        motifs.add("crucial");
+        motifs.add("crucial");
 
         try {
             // Lire le contenu du fichier
@@ -170,22 +134,14 @@ public class RechercheMotif {
             String csvFile = "durations.csv";
 
             // Chercher plusieurs motifs avec KMP et stocker les résultats dans le CSV
-            chercherPlusieursMotifs(text, motifs, true, csvFile);
+            chercherPlusieursMotifs(text, motifs, csvFile);
 
             // Appeler le script Python pour générer le diagramme
             String pythonCommand = "python3 generate_chart.py " + csvFile;
             Runtime.getRuntime().exec(pythonCommand);
-
-          /*  // Chercher plusieurs motifs avec KMP
-            chercherPlusieursMotifs(text, motifs, true);
-
-            // Chercher plusieurs motifs avec la méthode naïve
-            chercherPlusieursMotifs(text, motifs, false);*/
-
 
         } catch (IOException e) {
             System.err.println("Erreur lors de la lecture du fichier : " + e.getMessage());
         }
     }
 }
-

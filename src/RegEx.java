@@ -1,10 +1,7 @@
-import java.util.Scanner;
 import java.util.ArrayList;
 
-import java.lang.Exception;
-
 public class RegEx {
-    //MACROS
+
     static final int CONCAT = 0xC04CA7;
     static final int ETOILE = 0xE7011E;
     static final int ALTERN = 0xA17E54;
@@ -131,7 +128,7 @@ public class RegEx {
         return result;
     }
 
-//    concatenation : abc
+    //    concatenation : abc
     private static boolean containConcat(ArrayList<RegExTree> trees) {
         boolean firstFound = false;
         for (RegExTree t: trees) {
@@ -227,28 +224,5 @@ public class RegEx {
         subTrees.add(dotBCEtoile);
         return new RegExTree(ALTERN, subTrees);
     }
-}
 
-//UTILITARY CLASS
-class RegExTree {
-    protected int root;
-    protected ArrayList<RegExTree> subTrees;
-    public RegExTree(int root, ArrayList<RegExTree> subTrees) {
-        this.root = root;
-        this.subTrees = subTrees;
-    }
-    //FROM TREE TO PARENTHESIS
-    public String toString() {
-        if (subTrees.isEmpty()) return rootToString();
-        String result = rootToString()+"("+subTrees.get(0).toString();
-        for (int i=1;i<subTrees.size();i++) result+=","+subTrees.get(i).toString();
-        return result+")";
-    }
-    private String rootToString() {
-        if (root==RegEx.CONCAT) return ".";
-        if (root==RegEx.ETOILE) return "*";
-        if (root==RegEx.ALTERN) return "|";
-        if (root==RegEx.DOT) return ".";
-        return Character.toString((char)root);
-    }
 }

@@ -2,9 +2,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Automate {
-
     private int istate;
     private int astate;
+
     HashMap<Integer, ArrayList<Transition2>> transitions;
 
     public Automate(int istate, int fstate) {
@@ -96,28 +96,5 @@ public class Automate {
 
         return null;
     }
-}
-
-class Transition2 {
-
-    private char symbol;
-    private int tostate;
-
-    public Transition2( char symbol , int tostate){
-
-        this.symbol= symbol;
-        this.tostate= tostate;
-    }
-
-    public char getSymbol() { return symbol; }
-
-    public void setSymbol(char symbol) { this.symbol = symbol; }
-
-    public int getTostate() { return tostate; }
-
-    public void setTostate(int tostate) { this.tostate = tostate; }
 
 }
-
-
-
