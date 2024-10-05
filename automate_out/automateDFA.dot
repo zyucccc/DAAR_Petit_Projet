@@ -3,10 +3,11 @@ digraph Automate {
   node [shape=circle];
   start [shape=point];
   start -> 100;
-  105 [shape=doublecircle];
-  100 -> 101 [label="P"];
-  101 -> 102 [label="a"];
-  102 -> 103 [label="r"];
-  103 -> 104 [label="i"];
-  104 -> 105 [label="s"];
+  101 [shape=doublecircle];
+  102 [shape=doublecircle];
+  103 [shape=doublecircle];
+  100 -> 101 [label="a"];
+  100 -> 102 [label="b"];
+  102 -> 103 [label="c"];
+  103 -> 103 [label="c"];
 }
