@@ -20,6 +20,10 @@ public class RegEx {
     //CONSTRUCTOR
     public RegEx(){}
 
+    public RegEx(String regEx) {
+        RegEx.regEx = regEx;
+    }
+
     //MAIN
     public static void main(String arg[]) {
         System.out.println("Welcome to Bogota, Mr. Thomas Anderson.");
@@ -42,7 +46,25 @@ public class RegEx {
             try {
                 RegExTree ret = parse();
                 System.out.println("  >> Tree result: "+ret.toString()+".");
+                System.out.println("  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                System.out.println("  Automate start: ");
+                Automate automate = new Automate(ret);
+                automate.toDot();
+                System.out.println("  Automate result: \n"+automate.toString());
+
+                System.out.println("  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                System.out.println("  DFA start: ");
+                DFA dfa = new DFA(automate);
+                dfa.toDot();
+                System.out.println("  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                System.out.println("  DFA Minimisation start: ");
+                DFAmini mini = new DFAmini();
+                DFA DFA_minimisation = mini.minimize(dfa);
+                mini.toDot(DFA_minimisation);
+
+
             } catch (Exception e) {
+                System.err.println("cause: "+e.toString());
                 System.err.println("  >> ERROR: syntax error for regEx \""+regEx+"\".");
             }
         }
@@ -53,7 +75,7 @@ public class RegEx {
     }
 
     //FROM REGEX TO SYNTAX TREE
-    private static RegExTree parse() throws Exception {
+    public static RegExTree parse() throws Exception {
         //BEGIN DEBUG: set conditionnal to true for debug example
         if (false) throw new Exception();
         RegExTree example = exampleAhoUllman();

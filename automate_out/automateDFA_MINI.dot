@@ -1,0 +1,12 @@
+digraph Automate {
+  rankdir=LR;
+  node [shape=circle];
+  start [shape=point];
+  start -> 100;
+  105 [shape=doublecircle];
+  100 -> 101 [label="P"];
+  101 -> 102 [label="a"];
+  102 -> 103 [label="r"];
+  103 -> 104 [label="i"];
+  104 -> 105 [label="s"];
+}

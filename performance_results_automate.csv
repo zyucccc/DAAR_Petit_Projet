@@ -1,0 +1,4 @@
+Pattern,DFA Avg Time (ms),DFA Mini Avg Time (ms),Egrep Avg Time (ms)
+Sargon,7,3,8
+S(a|g|r)*on,7,3,14
+Paris,8,5,7
