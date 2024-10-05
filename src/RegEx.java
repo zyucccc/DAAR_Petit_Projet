@@ -21,7 +21,7 @@ public class RegEx {
     public RegEx(){}
 
     //MAIN
-    public static void main(String arg[]) {
+    /*public static void main(String arg[]) {
         System.out.println("Welcome to Bogota, Mr. Thomas Anderson.");
         if (arg.length!=0) {
             regEx = arg[0];
@@ -50,7 +50,7 @@ public class RegEx {
         System.out.println("  >> ...");
         System.out.println("  >> Parsing completed.");
         System.out.println("Goodbye Mr. Anderson.");
-    }
+    }*/
 
     //FROM REGEX TO SYNTAX TREE
     private static RegExTree parse() throws Exception {

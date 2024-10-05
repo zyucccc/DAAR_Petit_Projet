@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.io.FileWriter;
 
 
 public class RechercheMotif {
@@ -102,43 +103,36 @@ public class RechercheMotif {
         return new String(Files.readAllBytes(Paths.get(filePath)));
     }
 
-    public static void main(String[] args) {
-        if (args.length < 2) {
-            System.out.println("Usage: java PatternSearchComparison <file_path> <pattern>");
-            return;
-        }
+    public static void chercherPlusieursMotifs(String txt, List<String> motifs, boolean useKMP, String outputFile) throws IOException{
 
-        String filePath = args[0];
-        String pattern = args[1];
+        FileWriter writer = new FileWriter(outputFile);
 
-        try {
-            // lire le contenu du fichier
-            String text = readFileAsString(filePath);
+        // Écrire l'en-tête du fichier CSV
+        writer.append("Motif,Temps d'exécution (nanosecondes)\n");
 
-            // Mesurer la duree d'execution pour KMP
-            long kmpTime = duree(text, pattern, true);
-            List<Integer> kmpOccurrences = KMPalgo(text, pattern);
-            System.out.println("Temps d'exécution de KMP : " + kmpTime + " nanosecondes");
-            System.out.println("Le motif a été trouvé " + kmpOccurrences.size() + " fois avec KMP.");
+        for (String motif : motifs) {
+            System.out.println("\nRecherche du motif : " + motif);
 
-            // Mesurer la duree d'execution pour la methode naive
-            long naiveTime = duree(text, pattern, false);
-            List<Integer> naiveOccurrences = naivealgo(text, pattern);
-            System.out.println("Temps d'exécution de la méthode naïve : " + naiveTime + " nanosecondes");
-            System.out.println("Le motif a été trouvé " + naiveOccurrences.size() + " fois avec la méthode naïve.");
+            long execTime = duree(txt, motif, useKMP);
+            List<Integer> occurrences;
 
-            // Comparer les resultats
-            if (kmpOccurrences.equals(naiveOccurrences)) {
-                System.out.println("Les deux méthodes donnent le même résultat.");
+            if (useKMP) {
+                occurrences = KMPalgo(txt, motif);
+                System.out.println("Temps d'exécution de KMP : " + execTime + " nanosecondes");
             } else {
-                System.out.println("Les résultats sont différents !");
+                occurrences = naivealgo(txt, motif);
+                System.out.println("Temps d'exécution de l'algorithme naïf : " + execTime + " nanosecondes");
             }
 
-            // afficher les lignes ou le motif apparait
-            String[] lines = text.split("\n");
-            System.out.println("\nLes lignes où le motif est trouvé :");
-            for (int occurrence : kmpOccurrences) {
-                // chercher la ligne qui contient les occurrences
+            System.out.println("Le motif '" + motif + "' a été trouvé " + occurrences.size() + " fois.");
+
+            // Écrire les résultats dans le fichier CSV
+            writer.append(motif).append(",").append(Long.toString(execTime)).append("\n");
+
+            // Afficher les lignes où le motif est trouvé
+            String[] lines = txt.split("\n");
+            System.out.println("\nLes lignes où le motif '" + motif + "' est trouvé :");
+            for (int occurrence : occurrences) {
                 int lineIndex = 0;
                 int charCount = 0;
                 for (String line : lines) {
@@ -150,9 +144,48 @@ public class RechercheMotif {
                     lineIndex++;
                 }
             }
+        }
+        writer.flush();
+        writer.close();
+    }
+
+
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.out.println("Usage: java RechercheMotif <file_path> <motif1> <motif2> ... <motifN>");
+            return;
+        }
+
+        String filePath = args[0];
+        List<String> motifs = new ArrayList<>();
+        for (int i = 1; i < args.length; i++) {
+            motifs.add(args[i]);
+        }
+
+        try {
+            // Lire le contenu du fichier
+            String text = readFileAsString(filePath);
+
+            // Créer un fichier CSV pour stocker les résultats
+            String csvFile = "durations.csv";
+
+            // Chercher plusieurs motifs avec KMP et stocker les résultats dans le CSV
+            chercherPlusieursMotifs(text, motifs, true, csvFile);
+
+            // Appeler le script Python pour générer le diagramme
+            String pythonCommand = "python3 generate_chart.py " + csvFile;
+            Runtime.getRuntime().exec(pythonCommand);
+
+          /*  // Chercher plusieurs motifs avec KMP
+            chercherPlusieursMotifs(text, motifs, true);
+
+            // Chercher plusieurs motifs avec la méthode naïve
+            chercherPlusieursMotifs(text, motifs, false);*/
+
 
         } catch (IOException e) {
             System.err.println("Erreur lors de la lecture du fichier : " + e.getMessage());
         }
     }
 }
+
