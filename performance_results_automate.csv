@@ -1,5 +1,8 @@
 Pattern,DFA Avg Time (ms),DFA Mini Avg Time (ms),Egrep Avg Time (ms)
-Sargon,7,3,8
-S(a|g|r)*on,7,3,14
-Paris,8,5,7
-a|bc*,19,11,9
+S(a|g|r)*on,7,4,19
+a|bc*,18,11,9
+from,8,7,15
+Another,7,6,9
+Paris,8,6,9
+Egypt,8,5,9
+Sargon,7,4,8

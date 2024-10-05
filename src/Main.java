@@ -1,6 +1,7 @@
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -8,6 +9,11 @@ public class Main {
 
     //MAIN
     public static void main(String arg[]) {
+        ///////////////////////////////////////////////////////////////////////////////////
+        //-----------------------------------Automate------------------------------------//
+        ///////////////////////////////////////////////////////////////////////////////////
+
+        System.out.println("Methode 1: Automate >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         System.out.println("Welcome to the RegEx parser.");
         String regEx;
         if (arg.length!=0) {
@@ -49,7 +55,8 @@ public class Main {
                 System.out.println("Bravo! Success de construire l'automate");
                 System.out.println("Maintenant veuillez entre le path de texte à traiter avec l'automate");
                 Scanner scanner2 = new Scanner(System.in);
-                String path = scanner2.nextLine();
+//                String path = scanner2.nextLine();
+                String path = "./test.txt";
                 System.out.println("Le path est: " + path);
 
                 //ex test:S(a|g|r)*on
@@ -188,6 +195,40 @@ public class Main {
             } catch (Exception e) {
                 System.err.println(">> ERROR:  "+e.toString());
             }
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        //--------------------------------------KMP--------------------------------------//
+        ///////////////////////////////////////////////////////////////////////////////////
+        System.out.println("Methode 2: L'algo KMP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        System.out.println("Welcome to the algo KMP.");
+        // le chemin du fichier texte
+        String filePath = "./test.txt";
+
+        // les motifs à chercher
+        List<String> motifs = new ArrayList<>();
+        motifs.add("from");
+        motifs.add("Another");
+        motifs.add("Paris");
+        motifs.add("Egypt");
+        motifs.add("Sargon");
+
+        try {
+            // Lire le contenu du fichier
+            String text = RechercheMotif.readFileAsString(filePath);
+
+            // Créer un fichier CSV pour stocker les résultats
+            String csvFile = "performance_results_KMP.csv";
+
+            // Chercher plusieurs motifs avec KMP et stocker les résultats dans le CSV
+            RechercheMotif.chercherPlusieursMotifs(text, motifs, csvFile);
+
+            // Appeler le script Python pour générer le diagramme
+            String pythonCommand = "python3 generate_chart.py " + csvFile;
+            Runtime.getRuntime().exec(pythonCommand);
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors de la lecture du fichier : " + e.getMessage());
         }
 
         System.out.println("  >> ...");
